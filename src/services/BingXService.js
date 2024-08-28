@@ -40,13 +40,14 @@ class BingXService {
       transformResponse: (resp) => {
         return JSON.parse(resp);
       },
-      proxy: {
+    };
+    if (process.env.PROXY_HOST) {
+      config['proxy'] = {
         protocol: process.env.PROXY_POROTOCOL,
         host: process.env.PROXY_HOST,
         port: process.env.PROXY_PORT,
-      },
-    };
-
+      }
+    }
     try {
       const resp = await axios(config);
       return resp.data;
