@@ -27,7 +27,7 @@ async function main() {
     let allInProcessOrders = await PositionRepository.getAllInProcessOrders()
     // ezafe kardan jadid ha age position ya triger jadid ezafe shod
     let allOrders = [...openOrders, ...openPositions].sort((b, a) => a.updateTime - b.updateTime);
-    let newOrdersAfterLastCheck = openOrders.filter(i => (allInProcessOrders.findIndex(b => i.orderId == b.first_order_id || i.orderId == b.second_order_id) === -1))
+    let newOrdersAfterLastCheck = openOrders.filter(i => (allInProcessOrders.findIndex(b => i.symb == b.first_order_id || i.orderId == b.second_order_id) === -1))
     let newPositionsAfterLastCheck = openPositions.filter(i => (allInProcessOrders.findIndex(b => i.positionId == b.first_order_id || i.positionId == b.second_order_id) === -1))
 
     let allNewOrder = [...newPositionsAfterLastCheck, ...newOrdersAfterLastCheck].sort((b, a) => b.updateTime - a.updateTime)
@@ -35,7 +35,7 @@ async function main() {
     for (let index = 0; index < allNewOrder.length; index++) {
       let previouslyOrderNowPosition = false;
       let previouslyOrderIndex = allInProcessOrders.findIndex(i => (i.first_order_symbol == allNewOrder[index].symbol && i.first_order_type == 'order') || (i.second_order_symbol == allNewOrder[index].symbol && i.second_order_type == 'order'))
-      if (allNewOrder[index].positionId && previouslyOrderIndex !== -1) {
+      if (previouslyOrderIndex !== -1) {
         previouslyOrderNowPosition = 1;
         let firstOrSecond = allInProcessOrders[previouslyOrderIndex].first_order_symbol === allNewOrder[index].symbol ? 'first' : 'second';
         if (firstOrSecond == 'first') {
