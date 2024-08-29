@@ -9,6 +9,7 @@ export function up(knex) {
         table.double('last_handled_time').nullable();
         table.double('last_handled_order_id').nullable();
         table.string('wait_for').nullable;
+        table.text('extra_info').nullable(); // Adding a longtext field
     });
 };
 

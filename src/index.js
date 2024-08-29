@@ -10,16 +10,45 @@ const SINGLE_POSITION_PROFIT = 4;
 const SINGLE_POSITION_LOSS = -2;
 const SINGLE_POSITION_THRILING_STOP_PERCENT = .5;
 
+function sleep(ms) {
+  console.log('sleep')
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function arraysAreEqual(arr1, arr2) {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  return arr1.every((element, index) => element === arr2[index]);
+}
+
 async function main() {
   try {
     const bingXService = new BingXService(); // bingx api class
-
     let openPositions = await bingXService.openPositions();
     openPositions = openPositions.data.sort((a, b) => b.updateTime - a.updateTime)
     let openOrders = await bingXService.getAllOpenOrders()
     openOrders = openOrders.data.orders.sort((b, a) => b.time - a.time);
 
+    let openOrderSymbols = openOrders.map(i => i.symbol)
+    let openPositionSymbols = openPositions.map(i => i.symbol)
     let setting = await SettingRepository.findOrCreateFirst(); // get or create setting for knowing last order id last order wait for match or we are waiting for main order and start time to know about when script starts
+
+    let extra_info = JSON.parse(setting.extra_info ?? '{}');
+
+    let positionArrayAreEqual = arraysAreEqual(openPositionSymbols, extra_info.open_positions ?? [])
+    let orderArrayAreEqual = arraysAreEqual(openOrderSymbols, extra_info.open_orders ?? [])
+
+    await SettingRepository.updateExtraInfo({
+      'open_positions': openPositionSymbols,
+      'open_orders': openOrderSymbols,
+    });
+
+    if (!positionArrayAreEqual || !orderArrayAreEqual) {
+      await sleep(1000);
+      return;
+    }
+
     let lastInProcess = await PositionRepository.lastInProcess();
     await SettingRepository.updateWaitFor(lastInProcess ? (lastInProcess.second_order_id ? 'order' : 'match') : 'order')
     setting = await SettingRepository.findOrCreateFirst(); // get or create setting for knowing last order id last order wait for match or we are waiting for main order and start time to know about when script starts

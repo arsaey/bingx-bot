@@ -19,9 +19,10 @@ class Position extends Model {
       properties: {
         id: { type: 'integer' },
         start_time: { type: 'number' },
-        last_handled_time: { type: 'number',nullable:true },
-        last_handled_order_id: { type: 'number',nullable:true },
+        last_handled_time: { type: 'number', nullable: true },
+        last_handled_order_id: { type: 'number', nullable: true },
         wait_for: { type: 'string' },
+        extra_info: { type: 'string', nullable: true },
       }
     };
   }

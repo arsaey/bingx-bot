@@ -28,6 +28,17 @@ class SettingRepository {
       throw new Error(`Error update setting: ${error.message}`);
     }
   }
+  static async updateExtraInfo(extraInfo) {
+    try {
+
+      let setting = await Setting.query().update({
+        extra_info: JSON.stringify(extraInfo)
+      });
+      return setting;
+    } catch (error) {
+      throw new Error(`Error update extra info setting: ${error.message}`);
+    }
+  }
 }
 
 export default SettingRepository;
