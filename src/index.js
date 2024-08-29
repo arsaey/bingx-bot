@@ -313,6 +313,7 @@ async function main() {
 
     lastInProcess = await PositionRepository.lastInProcess();
     await SettingRepository.updateWaitFor(lastInProcess ? (lastInProcess.second_order_id ? 'order' : 'match') : 'order')
+    await sleep(500);
   } catch (error) {
     console.error('Error in main function:', error);
   }
