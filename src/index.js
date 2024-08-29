@@ -291,6 +291,7 @@ async function main() {
 
 main().then(() => {
   console.log('end');
+  process.exit(0);
 }).catch(err => {
   console.error('Error:', err);
 }).finally(() => {
