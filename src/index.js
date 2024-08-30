@@ -11,7 +11,6 @@ const SINGLE_POSITION_LOSS = -2;
 const SINGLE_POSITION_THRILING_STOP_PERCENT = .5;
 
 function sleep(ms) {
-  console.log('sleep')
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -19,7 +18,7 @@ function arraysAreEqual(arr1, arr2) {
   if (arr1.length !== arr2.length) {
     return false;
   }
-  return arr1.every((element, index) => element === arr2[index]);
+  return arr1.every((element) => arr2.findIndex(element) !== -1);
 }
 
 async function main() {
@@ -45,7 +44,8 @@ async function main() {
     });
 
     if (!positionArrayAreEqual || !orderArrayAreEqual) {
-      await sleep(1000);
+      console.log('stop due to change',openPositionSymbols, extra_info.open_positions ?? [],openOrderSymbols, extra_info.open_orders ?? []);
+      await sleep(1500);
       return;
     }
 
