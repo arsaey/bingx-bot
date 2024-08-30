@@ -18,7 +18,7 @@ function arraysAreEqual(arr1, arr2) {
   if (arr1.length !== arr2.length) {
     return false;
   }
-  return arr1.every((element) => arr2.findIndex(element) !== -1);
+  return arr1.every((element) => arr2.findIndex(i=>i===element) !== -1);
 }
 
 async function main() {
