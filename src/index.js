@@ -18,15 +18,19 @@ function arraysAreEqual(arr1, arr2) {
   if (arr1.length !== arr2.length) {
     return false;
   }
-  return arr1.every((element) => arr2.findIndex(i=>i===element) !== -1);
+  return arr1.every((element) => arr2.findIndex(i => i === element) !== -1);
 }
 
 async function main() {
   try {
     const bingXService = new BingXService(); // bingx api class
-    let openPositions = await bingXService.openPositions();
+    let [openPositions, openOrders] = await Promise.all([
+      bingXService.openPositions(),
+      bingXService.getAllOpenOrders()
+    ]);
+    //    let openPositions = await bingXService.openPositions();
     openPositions = openPositions.data.sort((a, b) => b.updateTime - a.updateTime)
-    let openOrders = await bingXService.getAllOpenOrders()
+    //  let openOrders = await bingXService.getAllOpenOrders()
     openOrders = openOrders.data.orders.sort((b, a) => b.time - a.time);
 
     let openOrderSymbols = openOrders.map(i => i.symbol)
@@ -44,8 +48,8 @@ async function main() {
     });
 
     if (!positionArrayAreEqual || !orderArrayAreEqual) {
-      console.log('stop due to change',openPositionSymbols, extra_info.open_positions ?? [],openOrderSymbols, extra_info.open_orders ?? []);
-      await sleep(1500);
+      console.log('stop due to change', openPositionSymbols, extra_info.open_positions ?? [], openOrderSymbols, extra_info.open_orders ?? []);
+      await sleep(100);
       return;
     }
 
@@ -220,14 +224,20 @@ async function main() {
         }
         if (element.final_status == 'thriling-both') {
           if (profit < element.maximum_profit - DUAL_POSITION_THRILING_STOP_PERCENT) {
-            await bingXService.closePosition(element.first_order_id)
-            await bingXService.closePosition(element.second_order_id)
+            await Promise.all([
+              bingXService.closePosition(element.first_order_id),
+              bingXService.closePosition(element.second_order_id)
+            ]);
+
           }
         }
 
         if (profit <= DUAL_POSITION_LOSS) {
-          await bingXService.closePosition(element.first_order_id)
-          await bingXService.closePosition(element.second_order_id)
+          await Promise.all([
+            bingXService.closePosition(element.first_order_id),
+            bingXService.closePosition(element.second_order_id)
+          ]);
+
         }
       } else if (element.first_order_type == 'position' && element.second_order_type != 'position') {
         let avgPrice = Number(element.first_order_api_data.avgPrice);
@@ -257,15 +267,18 @@ async function main() {
         if (element.final_status == 'thriling-first') {
           if (profit < element.first_order_profit - SINGLE_POSITION_THRILING_STOP_PERCENT) {
             await bingXService.closePosition(element.first_order_id)
-            PositionRepository.updatePosition(element.id, {
+            await PositionRepository.updatePosition(element.id, {
               final_status: null
             })
           }
         }
 
         if (profit <= SINGLE_POSITION_LOSS) {
-          await bingXService.closePosition(element.first_order_id)
-          await bingXService.cancellAllOrderBySymbol(element.second_order_symbol)
+          await Promise.all([
+            bingXService.closePosition(element.first_order_id),
+            bingXService.cancellAllOrderBySymbol(element.second_order_symbol)
+          ]);
+
         }
       } else if (element.first_order_type != 'position' && element.second_order_type == 'position') {
         let avgPrice = Number(element.second_order_api_data.avgPrice);
@@ -282,7 +295,7 @@ async function main() {
         if (profit >= SINGLE_POSITION_PROFIT) {
 
           if (element.second_order_profit < profit) {
-            PositionRepository.updatePosition(element.id, {
+            await PositionRepository.updatePosition(element.id, {
               final_status: 'thriling-first',
               second_order_profit: profit
             })
@@ -294,17 +307,21 @@ async function main() {
 
         if (element.final_status == 'thriling-first') {
           if (profit < element.second_order_profit - SINGLE_POSITION_THRILING_STOP_PERCENT) {
-            await bingXService.closePosition(element.second_order_id)
-            PositionRepository.updatePosition(element.id, {
-              final_status: null
-            })
+            await Promise.all([
+              bingXService.closePosition(element.second_order_id),
+              PositionRepository.updatePosition(element.id, { final_status: null })
+            ]);
+
           }
         }
 
 
         if (profit <= SINGLE_POSITION_LOSS) {
-          await bingXService.cancellAllOrderBySymbol(element.first_order_symbol)
-          await bingXService.closePosition(element.second_order_id)
+          await Promise.all([
+            bingXService.cancellAllOrderBySymbol(element.first_order_symbol),
+            bingXService.closePosition(element.second_order_id)
+          ]);
+
         }
       }
     }
@@ -313,7 +330,6 @@ async function main() {
 
     lastInProcess = await PositionRepository.lastInProcess();
     await SettingRepository.updateWaitFor(lastInProcess ? (lastInProcess.second_order_id ? 'order' : 'match') : 'order')
-    await sleep(500);
   } catch (error) {
     console.error('Error in main function:', error);
   }
@@ -327,4 +343,3 @@ main().then(() => {
 }).finally(() => {
   knexInstance.destroy()
 });
-
