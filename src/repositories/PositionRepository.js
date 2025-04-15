@@ -60,6 +60,15 @@ class PositionRepository {
       throw new Error(`Error finding all in process positions: ${error.message}`);
     }
   }
+//getAllOrders
+ static async getAllOrders() {
+    try {
+      const positions = await Position.query().orderBy('id','desc');
+      return positions;
+    } catch (error) {
+      throw new Error(`Error finding all in process positions: ${error.message}`);
+    }
+  }
 
   static async lastInProcess() {
     try {

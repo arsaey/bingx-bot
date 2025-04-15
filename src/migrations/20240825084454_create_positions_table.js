@@ -16,6 +16,15 @@ export function up(knex) {
     table.integer('is_in_process').defaultTo(1);
     table.string('final_status').nullable().checkIn(['thriling-first', 'thriling-both', 'stop-first', 'stop-both', 'cancel-both']);
     table.double('maximum_profit').nullable(); // Add the maximum_profit column
+    table.double('unique_maximum_profit').nullable(); // Add the maximum_profit column
+    table.double('current_sum_profit').nullable();
+    table.double('order_update_percent').nullable().defaultTo(0);
+
+    table.double('first_order_init_price').nullable().defaultTo(0);
+    table.double('first_order_update_percent').nullable().defaultTo(0);
+    table.double('second_order_init_price').nullable().defaultTo(0);
+    table.double('second_order_update_percent').nullable().defaultTo(0);
+
     table.timestamps(true, true); // Adds created_at and updated_at
   });
 };

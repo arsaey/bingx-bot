@@ -8,10 +8,10 @@ export default {
   production: {
     client: 'mysql2',
     connection: {
-      database: 'crypto_db',
-      user:     'hope',
-      password: 'a20139'
-    },
+      database: 'khashbase',
+      user:     'khashiola',
+      password: 'c0roCodile',
+  host: '127.0.0.1'  },
    
     pool: {
       min: 2,

@@ -23,30 +23,21 @@ class Position extends Model {
         second_order_id: {}, // Fix the property name to match database column
         is_in_process: { type: 'integer', default: 1 }, // Optional: if you want to enforce default value in validation
         final_status: {
-
           type: 'string',
           nullable: true,
           enum: [null, 'thriling-first', 'thriling-both', 'stop-first', 'stop-both', 'cancel-both'] // Enum-like constraint for final_status
         },
         maximum_profit: { type: 'number', nullable: true },
         unique_maximum_profit: { type: 'number', nullable: true },
-        current_sum_profit: { type: 'number', nullable: true },
+        current_profit: { type: 'number', nullable: true },
         first_order_symbol: { type: 'string' },
         second_order_symbol: { type: 'string', nullable: true },
         first_order_type: { type: 'string' },
         second_order_type: { type: 'string', nullable: true },
         first_order_profit: { type: 'number' },
         second_order_profit: { type: 'number', nullable: true },
-        order_update_percent: { type: 'number', nullable: true },
-       
-        first_order_init_price: { type: 'number', nullable: true },
-        first_order_update_percent: { type: 'number', nullable: true },
-
-        second_order_init_price: { type: 'number', nullable: true },
-        second_order_update_percent: { type: 'number', nullable: true },
-
-        created_at: {   }, // Optional: for ISO 8601 date-time format
-        updated_at: {   }  // Optional: for ISO 8601 date-time format
+        created_at: { type: 'string', format: 'date-time' }, // Optional: for ISO 8601 date-time format
+        updated_at: { type: 'string', format: 'date-time' }  // Optional: for ISO 8601 date-time format
       }
     };
   }
